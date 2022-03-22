@@ -1,0 +1,4 @@
+# ignore target folder
+target
+#ignore Bin folder
+bin
