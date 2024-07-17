@@ -11,6 +11,13 @@ pipeline {
         SONAR_SCANNER_CLI_HOME ="/home/devops/sonarqube/sonar-scanner-5.0.1.3006-linux"
     }
     stages {
+	stage('ReadEnv')
+        {
+            steps {
+                readProperties charset: '', file: 'jenkins.properties', text: ''
+                
+            }
+        }
         stage('Checkout')
         {
             steps {
@@ -25,13 +32,7 @@ pipeline {
                 }
             }
         }
-        stage('ReadEnv')
-        {
-            steps {
-                readProperties charset: '', file: 'jenkins.properties', text: ''
-                
-            }
-        }
+        
         stage('Build') {
             steps {
                 echo "build"
