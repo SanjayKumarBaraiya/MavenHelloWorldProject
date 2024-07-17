@@ -14,8 +14,9 @@ pipeline {
 	stage('ReadEnv')
         {
             steps {
-                readProperties charset: '', file: 'jenkins.properties', text: ''
-                
+               def project_prop = readProperties charset: '', file: 'jenkins.properties', text: ''
+        	branchname = project_prop.branch
+		echo "hi $branchname"
             }
         }
         stage('Checkout')
