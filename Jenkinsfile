@@ -15,7 +15,7 @@ pipeline {
         {
             steps {
                def project_prop = readProperties charset: '', file: 'jenkins.properties', text: ''
-        	branchname = project_prop.branch
+        	branchname = project_prop.Branch
 		echo "hi $branchname"
             }
         }
