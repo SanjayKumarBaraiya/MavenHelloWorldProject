@@ -47,6 +47,10 @@ pipeline {
         FAILURE_MAIL_SUB="email_subject_failure"
         RECIPIENTS_ID="recipients_list"
     }
+    options {
+        // Add other options as per your requirements
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '180', numToKeepStr: '500')
+    }
     stages {
         stage('Checkout')
         {
