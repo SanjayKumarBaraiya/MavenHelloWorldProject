@@ -6,9 +6,9 @@ pipeline {
         //label <#NAME>
     //}
     parameters {
-        string defaultValue: 'https://github.com/SanjayKumarBaraiya/', description: 'git repository url', name: 'GIT_URL', trim: true
-        string defaultValue: 'MavenHelloWorldProject', description: 'git repository project name', name: 'GIT_PROJECT_NAME', trim: true
-        string defaultValue: 'master', description: 'git repository project branch name', name: 'BRANCH_NAME', trim: true
+        string defaultValue: 'https://github.com/sprs1/', description: 'git repository url', name: 'GIT_URL', trim: true
+        string defaultValue: 'springboot-mvn', description: 'git repository project name', name: 'GIT_PROJECT_NAME', trim: true
+        string defaultValue: 'wxw', description: 'git repository project branch name', name: 'BRANCH_NAME', trim: true
         activeChoice choiceType: 'PT_MULTI_SELECT', description: 'security scan type list', filterLength: 1, filterable: false, name: 'SCAN_TYPE', randomName: 'choice-parameter-8495413156634390', script: groovyScript(fallbackScript: [classpath: [], oldScript: '', sandbox: false, script: ''], script: [classpath: [], oldScript: '', sandbox: true, script: 'return [\'OSS\',\'DAST\',\'SAST\']'])
         reactiveChoice choiceType: 'PT_MULTI_SELECT', filterLength: 1, filterable: false, name: 'DAST_SCAN_TOOL_NAME', randomName: 'choice-parameter-8495557759170690', referencedParameters: 'SCAN_TYPE', script: groovyScript(fallbackScript: [classpath: [], oldScript: '', sandbox: false, script: ''], script: [classpath: [], oldScript: '', sandbox: true, script: '''// Define the list of tools for DAST
                     def dastTools = [\'zap\', \'test\']
@@ -40,6 +40,7 @@ pipeline {
     environment {
         GIT_URL="${params.GIT_URL}"
         BRANCH_NAME="${params.BRANCH_NAME}"
+        PATH="/home/node/node-v16.16.0-linux-ppc64le/bin:$PATH"
         GIT_PROJECT_NAME="${params.GIT_PROJECT_NAME}"
         SUCCESS_MAIL_BODY="email_body_contents-for_success_mail"
         FAILURE_MAIL_BODY="email_body_contents_for_failure_mail"
@@ -93,7 +94,11 @@ pipeline {
                     env.SONAR_PROJECT_VERSION = toolsProps['sonar.projectVersion']
                     env.SONAR_SOURCE_ENCODING = toolsProps['sonar.sourceEncoding']
                     env.SONAR_SCANNER_CLI_HOME = toolsProps['sonar.sonar_scanner_cli_home']
-                     env.DEPENDENCY_PROJECT = toolsProps['dependency.project']
+                    env.SONAR_EXCLUSIONS = toolsProps['sonar.exclusions']
+                    env.SONAR_COVERAGE_EXCLUSIONS = toolsProps['sonar.coverage.exclusions']
+                    env.SONAR_TIMEOUT = toolsProps['sonar.ws_timeout']
+                    // Load Dependency related properties
+                    env.DEPENDENCY_PROJECT = toolsProps['dependency.project']
                     env.DEPENDENCY_FORMAT = toolsProps['dependency.format']
                     env.DEPENDENCY_CHECK_CLI_HOME = toolsProps['dependency.dependency_check_cli_home']
                 }
@@ -111,18 +116,19 @@ pipeline {
                 
                 echo "SonarQube Analysis Start"
                 withSonarQubeEnv('Sonarqube') {
-                    echo "${SONAR_SCANNER_CLI_HOME}"
-                    sh '${SONAR_SCANNER_CLI_HOME}/bin/sonar-scanner -Dsonar.projectBaseDir=$WORKSPACE \
+                    echo "$SONAR_SCANNER_CLI_HOME"
+                    sh '$SONAR_SCANNER_CLI_HOME/bin/sonar-scanner -Dsonar.projectBaseDir=$WORKSPACE \
 					-Dsonar.projectKey="$SONAR_PROJECT_KEY" \
 					-Dsonar.projectName="$SONAR_PROJECT_NAME"  \
 					-Dsonar.projectVersion="$SONAR_PROJECT_VERSION" \
                     -Dsonar.sourceEncoding="$SONAR_SOURCE_ENCODING" \
-                    -Dsonar.coverage.jacoco.xmlReportPaths=${WORKSPACE}/build/reports/jacoco/test/jacocoTestReport.xml \
-                    -Dsonar.exclusions=**/build/**,**/reports/** \
-                    -Dsonar.coverage.exclusions=**/*Test*.java,**/agent/models/** \
+                    -Dsonar.coverage.jacoco.xmlReportPaths=$WORKSPACE/build/reports/jacoco/test/jacocoTestReport.xml \
+                    -Dsonar.exclusions="$SONAR_EXCLUSIONS" \
+                    -Dsonar.coverage.exclusions="$SONAR_COVERAGE_EXCLUSIONS" \
                     -Dsonar.sources=. \
 					-Dsonar.java.binaries=$WORKSPACE \
-					-Dsonar.ws.timeout=8000'
+                    -Dsonar.java.test.binaries=$WORKSPACE \
+					-Dsonar.ws.timeout="$SONAR_TIMEOUT"'
                 }
             }
             post {
@@ -149,7 +155,7 @@ pipeline {
             steps {
                 
                 echo "Dependency-Check Analysis Start"
-                sh '''${DEPENDENCY_CHECK_CLI_HOME}/bin/dependency-check.sh \
+                sh '''$DEPENDENCY_CHECK_CLI_HOME/bin/dependency-check.sh \
                     --project "$DEPENDENCY_PROJECT" \
                     --scan "$WORKSPACE" \
                     --noupdate \
