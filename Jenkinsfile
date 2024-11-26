@@ -6,9 +6,9 @@ pipeline {
         //label <#NAME>
     //}
     parameters {
-        string defaultValue: 'https://github.com/sprs1/', description: 'git repository url', name: 'GIT_URL', trim: true
-        string defaultValue: 'springboot-mvn', description: 'git repository project name', name: 'GIT_PROJECT_NAME', trim: true
-        string defaultValue: 'wxw', description: 'git repository project branch name', name: 'BRANCH_NAME', trim: true
+        string defaultValue: 'https://github.com/SanjayKumarBaraiya/', description: 'git repository url', name: 'GIT_URL', trim: true
+        string defaultValue: 'MavenHelloWorldProject', description: 'git repository project name', name: 'GIT_PROJECT_NAME', trim: true
+        string defaultValue: 'master', description: 'git repository project branch name', name: 'BRANCH_NAME', trim: true
         activeChoice choiceType: 'PT_MULTI_SELECT', description: 'security scan type list', filterLength: 1, filterable: false, name: 'SCAN_TYPE', randomName: 'choice-parameter-8495413156634390', script: groovyScript(fallbackScript: [classpath: [], oldScript: '', sandbox: false, script: ''], script: [classpath: [], oldScript: '', sandbox: true, script: 'return [\'OSS\',\'DAST\',\'SAST\']'])
         reactiveChoice choiceType: 'PT_MULTI_SELECT', filterLength: 1, filterable: false, name: 'DAST_SCAN_TOOL_NAME', randomName: 'choice-parameter-8495557759170690', referencedParameters: 'SCAN_TYPE', script: groovyScript(fallbackScript: [classpath: [], oldScript: '', sandbox: false, script: ''], script: [classpath: [], oldScript: '', sandbox: true, script: '''// Define the list of tools for DAST
                     def dastTools = [\'zap\', \'test\']
