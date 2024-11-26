@@ -71,6 +71,10 @@ pipeline {
         stage('Build') {
             steps {
                 echo "build"
+		sh '''
+  			echo "Build"
+     			#mvn install
+		'''
             }
 
            post {
